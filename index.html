@@ -64,6 +64,22 @@
             border: 2px solid var(--primary);
             background-color: rgba(108, 92, 231, 0.05);
         }
+        .referral-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid #28a745;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        .referral-error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -538,6 +554,14 @@
                             <h5 class="mb-0">Create New Account</h5>
                         </div>
                         <div class="card-body">
+                            <div class="referral-success" id="referral-success">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <span id="referral-success-msg"></span>
+                            </div>
+                            <div class="referral-error" id="referral-error">
+                                <i class="bi bi-exclamation-circle-fill text-danger me-2"></i>
+                                <span id="referral-error-msg"></span>
+                            </div>
                             <form id="register-form">
                                 <div class="mb-3">
                                     <label for="register-email" class="form-label">Email Address</label>
@@ -577,6 +601,7 @@
         const users = JSON.parse(localStorage.getItem('nafanest_users')) || [];
         let currentUser = JSON.parse(localStorage.getItem('nafanest_current_user')) || null;
         let selectedPlan = localStorage.getItem('nafanest_selected_plan') || null;
+        let referralEmail = null;
 
         // Plan details
         const plans = {
@@ -632,8 +657,8 @@
                 document.getElementById('referral-earnings').textContent = currentUser.referralEarnings ? currentUser.referralEarnings.toFixed(2) : '0.00';
                 document.getElementById('referral-count').textContent = currentUser.teamMembers ? currentUser.teamMembers.length : '0';
                 
-                // Update referral link with user's email
-                const referralLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(currentUser.email)}`;
+                // Update referral link with user's referral code
+                const referralLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(currentUser.referralCode)}`;
                 document.getElementById('referral-link').value = referralLink;
                 
                 // Update transactions
@@ -754,11 +779,12 @@
             // Handle referral if code is provided
             let referrer = null;
             if (referralCode) {
-                // Check if referral code is an email (from URL)
-                if (referralCode.includes('@')) {
-                    referrer = users.find(user => user.email === decodeURIComponent(referralCode));
-                } else {
-                    referrer = users.find(user => user.referralCode === referralCode);
+                // Try to find referrer by referral code
+                referrer = users.find(user => user.referralCode === referralCode);
+                
+                // If not found by code, try to find by email (for backward compatibility)
+                if (!referrer && referralEmail) {
+                    referrer = users.find(user => user.email === referralEmail);
                 }
                 
                 if (referrer) {
@@ -776,8 +802,13 @@
                     
                     // Set referrer for new user
                     newUser.referrer = referrer.email;
+                    
+                    // Show success message
+                    document.getElementById('referral-success').style.display = 'block';
+                    document.getElementById('referral-success-msg').textContent = `You have been referred by ${referrer.email}`;
                 } else {
-                    alert('Invalid referral code. Please check and try again.');
+                    document.getElementById('referral-error').style.display = 'block';
+                    document.getElementById('referral-error-msg').textContent = 'Invalid referral code. Please check and try again.';
                     return;
                 }
             }
@@ -1147,20 +1178,57 @@
             const refParam = urlParams.get('ref');
             
             if (refParam) {
-                // If we're on the register page, pre-fill the referral code
-                if (window.location.hash === '#register-content' || window.location.hash === '#register-tab') {
+                // Try to find if refParam is a valid referral code
+                const referrer = users.find(user => user.referralCode === refParam);
+                
+                if (referrer) {
+                    // Set the referral code in the form
                     document.getElementById('referral-code').value = refParam;
+                    referralEmail = referrer.email;
+                    
+                    // If we're not on register page, switch to it
+                    if (!window.location.hash.includes('register-content')) {
+                        document.querySelectorAll('.tab-content').forEach(content => {
+                            content.style.display = 'none';
+                        });
+                        document.getElementById('register-content').style.display = 'block';
+                        document.querySelectorAll('.nav-link').forEach(navLink => {
+                            navLink.classList.remove('active');
+                        });
+                        document.getElementById('register-tab').classList.add('active');
+                    }
+                    
+                    // Show success message
+                    document.getElementById('referral-success').style.display = 'block';
+                    document.getElementById('referral-success-msg').textContent = `You have been referred by ${referrer.email}`;
                 } else {
-                    // Redirect to register page with referral code
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.style.display = 'none';
-                    });
-                    document.getElementById('register-content').style.display = 'block';
-                    document.querySelectorAll('.nav-link').forEach(navLink => {
-                        navLink.classList.remove('active');
-                    });
-                    document.getElementById('register-tab').classList.add('active');
-                    document.getElementById('referral-code').value = refParam;
+                    // If not found by code, try by email
+                    const referrerByEmail = users.find(user => user.email === refParam);
+                    if (referrerByEmail) {
+                        // Set the referral code in the form
+                        document.getElementById('referral-code').value = referrerByEmail.referralCode;
+                        referralEmail = referrerByEmail.email;
+                        
+                        // If we're not on register page, switch to it
+                        if (!window.location.hash.includes('register-content')) {
+                            document.querySelectorAll('.tab-content').forEach(content => {
+                                content.style.display = 'none';
+                            });
+                            document.getElementById('register-content').style.display = 'block';
+                            document.querySelectorAll('.nav-link').forEach(navLink => {
+                                navLink.classList.remove('active');
+                            });
+                            document.getElementById('register-tab').classList.add('active');
+                        }
+                        
+                        // Show success message
+                        document.getElementById('referral-success').style.display = 'block';
+                        document.getElementById('referral-success-msg').textContent = `You have been referred by ${referrerByEmail.email}`;
+                    } else {
+                        // If not found at all, show error message
+                        document.getElementById('referral-error').style.display = 'block';
+                        document.getElementById('referral-error-msg').textContent = 'Invalid referral code. Please check the link.';
+                    }
                 }
             }
         }
