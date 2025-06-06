@@ -448,13 +448,20 @@
 </main>
 
 <script>
-  // --- Data store in localStorage ---
+  // --- Data store in localStorage with domain-specific keys ---
   // users = {username: {password, balance, plan, referral, team:[], profit, deposits: [], withdrawals: []}}
   // session = {username}
 
+  // Get domain-specific key
+  function getStorageKey(key) {
+    const domain = window.location.hostname.replace(/^www\./, '');
+    return `nafanest_${domain}_${key}`;
+  }
+
   // Initialize data if not exists
   function initializeData() {
-    if (!localStorage.getItem('nafanest_users')) {
+    const usersKey = getStorageKey('users');
+    if (!localStorage.getItem(usersKey)) {
       const initialData = {
         // Sample admin user for testing
         admin: {
@@ -479,12 +486,13 @@
           withdrawals: []
         }
       };
-      localStorage.setItem('nafanest_users', JSON.stringify(initialData));
+      localStorage.setItem(usersKey, JSON.stringify(initialData));
     }
     
     // Ensure session is properly initialized
-    if (!localStorage.getItem('nafanest_session')) {
-      localStorage.setItem('nafanest_session', '');
+    const sessionKey = getStorageKey('session');
+    if (!localStorage.getItem(sessionKey)) {
+      localStorage.setItem(sessionKey, '');
     }
   }
 
@@ -531,7 +539,8 @@
   
   function getUsers() {
     try {
-      const users = JSON.parse(localStorage.getItem('nafanest_users') || '{}');
+      const usersKey = getStorageKey('users');
+      const users = JSON.parse(localStorage.getItem(usersKey) || '{}');
       return users || {};
     } catch (e) {
       console.error('Error parsing users data:', e);
@@ -541,7 +550,8 @@
   
   function saveUsers(users) {
     try {
-      localStorage.setItem('nafanest_users', JSON.stringify(users));
+      const usersKey = getStorageKey('users');
+      localStorage.setItem(usersKey, JSON.stringify(users));
     } catch (e) {
       console.error('Error saving users data:', e);
     }
@@ -549,7 +559,8 @@
   
   function getSessionUser() {
     try {
-      const session = localStorage.getItem('nafanest_session');
+      const sessionKey = getStorageKey('session');
+      const session = localStorage.getItem(sessionKey);
       return session || null;
     } catch (e) {
       console.error('Error getting session:', e);
@@ -559,7 +570,8 @@
   
   function setSessionUser(username) {
     try {
-      localStorage.setItem('nafanest_session', username);
+      const sessionKey = getStorageKey('session');
+      localStorage.setItem(sessionKey, username);
     } catch (e) {
       console.error('Error setting session:', e);
     }
@@ -567,7 +579,8 @@
   
   function clearSession() {
     try {
-      localStorage.setItem('nafanest_session', '');
+      const sessionKey = getStorageKey('session');
+      localStorage.setItem(sessionKey, '');
     } catch (e) {
       console.error('Error clearing session:', e);
     }
