@@ -271,7 +271,7 @@
       <div class="plan basic">
         <h3>Basic Plan</h3>
         <p><strong>$50 - $499</strong></p>
-        <p>3% Daily ROI for 90 days</p>
+        <p>3% Daily ROI for 30 days</p>
         <p>Principal returned after plan</p>
         <p>24/7 Support</p>
         <p>Instant withdrawals</p>
@@ -280,7 +280,7 @@
       <div class="plan premium">
         <h3>Premium Plan</h3>
         <p><strong>$500 - $4999</strong></p>
-        <p>5% Daily ROI for 120 days</p>
+        <p>5% Daily ROI for 45 days</p>
         <p>Principal returned after plan</p>
         <p>Priority Support</p>
         <p>Instant withdrawals</p>
@@ -289,7 +289,7 @@
       <div class="plan vip">
         <h3>VIP Plan</h3>
         <p><strong>$5000+</strong></p>
-        <p>7% Daily ROI for 160 days</p>
+        <p>7% Daily ROI for 60 days</p>
         <p>Principal returned after plan</p>
         <p>Personal Manager</p>
         <p>Instant withdrawals</p>
@@ -453,35 +453,44 @@
   // session = {username}
 
   // Initialize data if not exists
-  if (!localStorage.getItem('nafanest_users')) {
-    localStorage.setItem('nafanest_users', JSON.stringify({
-      // Sample admin user for testing
-      admin: {
-        password: 'admin123',
-        balance: 1000,
-        plan: 'vip',
-        referral: '',
-        team: ['testuser'],
-        profit: 70,
-        deposits: [{amount: 1000, plan: 'vip', date: new Date().toISOString(), txHash: 'abc123', status: 'verified'}],
-        withdrawals: []
-      },
-      // Sample test user
-      testuser: {
-        password: 'test123',
-        balance: 500,
-        plan: 'premium',
-        referral: 'admin',
-        team: [],
-        profit: 25,
-        deposits: [{amount: 500, plan: 'premium', date: new Date().toISOString(), txHash: 'def456', status: 'verified'}],
-        withdrawals: []
-      }
-    }));
+  function initializeData() {
+    if (!localStorage.getItem('nafanest_users')) {
+      const initialData = {
+        // Sample admin user for testing
+        admin: {
+          password: 'admin123',
+          balance: 1000,
+          plan: 'vip',
+          referral: '',
+          team: ['testuser'],
+          profit: 70,
+          deposits: [{amount: 1000, plan: 'vip', date: new Date().toISOString(), txHash: 'abc123', status: 'verified'}],
+          withdrawals: []
+        },
+        // Sample test user
+        testuser: {
+          password: 'test123',
+          balance: 500,
+          plan: 'premium',
+          referral: 'admin',
+          team: [],
+          profit: 25,
+          deposits: [{amount: 500, plan: 'premium', date: new Date().toISOString(), txHash: 'def456', status: 'verified'}],
+          withdrawals: []
+        }
+      };
+      localStorage.setItem('nafanest_users', JSON.stringify(initialData));
+    }
+    
+    // Ensure session is properly initialized
+    if (!localStorage.getItem('nafanest_session')) {
+      localStorage.setItem('nafanest_session', '');
+    }
   }
 
   // Helpers
   function $(id) { return document.getElementById(id); }
+  
   function showPage(pageId) {
     document.querySelectorAll('.page-section').forEach(sec => {
       sec.classList.toggle('hidden', sec.id !== pageId);
@@ -490,6 +499,7 @@
     if (pageId === 'dashboard') renderDashboard();
     if (pageId === 'referral') renderReferralPage();
   }
+  
   function updateNavButtons() {
     const sessionUser = getSessionUser();
     const navRegister = $('nav-register');
@@ -518,21 +528,51 @@
       navLogout.classList.add('hidden');
     }
   }
+  
   function getUsers() {
-    return JSON.parse(localStorage.getItem('nafanest_users') || '{}');
+    try {
+      const users = JSON.parse(localStorage.getItem('nafanest_users') || '{}');
+      return users || {};
+    } catch (e) {
+      console.error('Error parsing users data:', e);
+      return {};
+    }
   }
+  
   function saveUsers(users) {
-    localStorage.setItem('nafanest_users', JSON.stringify(users));
+    try {
+      localStorage.setItem('nafanest_users', JSON.stringify(users));
+    } catch (e) {
+      console.error('Error saving users data:', e);
+    }
   }
+  
   function getSessionUser() {
-    return localStorage.getItem('nafanest_session') || null;
+    try {
+      const session = localStorage.getItem('nafanest_session');
+      return session || null;
+    } catch (e) {
+      console.error('Error getting session:', e);
+      return null;
+    }
   }
+  
   function setSessionUser(username) {
-    localStorage.setItem('nafanest_session', username);
+    try {
+      localStorage.setItem('nafanest_session', username);
+    } catch (e) {
+      console.error('Error setting session:', e);
+    }
   }
+  
   function clearSession() {
-    localStorage.removeItem('nafanest_session');
+    try {
+      localStorage.setItem('nafanest_session', '');
+    } catch (e) {
+      console.error('Error clearing session:', e);
+    }
   }
+  
   function capitalize(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -540,7 +580,7 @@
 
   // Compute estimated daily profit based on plan & balance
   function computeDailyProfit(user) {
-    if (!user.plan || !user.balance) return 0;
+    if (!user || !user.plan || !user.balance) return 0;
     const plans = {
       basic: 0.03,
       premium: 0.05,
@@ -569,6 +609,12 @@
     const users = getUsers();
     if (users[username]) {
       alert('Username already exists. Please choose another.');
+      return;
+    }
+
+    // Validate referral if provided
+    if (referral && !users[referral]) {
+      alert('Referral username does not exist. Please check or leave blank.');
       return;
     }
 
@@ -650,6 +696,13 @@
 
     const users = getUsers();
     const user = users[username];
+    
+    if (!user) {
+      alert('User data not found. Please login again.');
+      clearSession();
+      showPage('login');
+      return;
+    }
 
     // Balance
     $('dashboard-balance').querySelector('p').textContent = `$${user.balance.toFixed(2)}`;
@@ -670,28 +723,34 @@
   }
 
   // Copy referral link on click
-  $('referral-link').addEventListener('click', () => {
-    copyReferralLink($('referral-link').textContent);
-  });
-  $('referral-link').addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      copyReferralLink($('referral-link').textContent);
-    }
-  });
-  $('referral-link-page').addEventListener('click', () => {
-    copyReferralLink($('referral-link-page').textContent);
-  });
-  $('referral-link-page').addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      copyReferralLink($('referral-link-page').textContent);
-    }
-  });
-  function copyReferralLink(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Referral link copied to clipboard!');
-    }).catch(() => {
-      alert('Failed to copy. Please copy manually.');
+  function setupReferralLinkCopy(element) {
+    element.addEventListener('click', () => {
+      copyReferralLink(element.textContent);
     });
+    element.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        copyReferralLink(element.textContent);
+      }
+    });
+  }
+  
+  function copyReferralLink(text) {
+    try {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Referral link copied to clipboard!');
+      }).catch(() => {
+        // Fallback for browsers that don't support clipboard API
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('Referral link copied to clipboard!');
+      });
+    } catch (e) {
+      alert('Failed to copy. Please copy manually.');
+    }
   }
 
   // Deposit form handler
@@ -725,6 +784,13 @@
     }
     const users = getUsers();
     const user = users[username];
+    
+    if (!user) {
+      alert('User data not found. Please login again.');
+      clearSession();
+      showPage('login');
+      return;
+    }
 
     // Record deposit
     user.deposits.push({
@@ -785,6 +851,13 @@
     }
     const users = getUsers();
     const user = users[username];
+    
+    if (!user) {
+      alert('User data not found. Please login again.');
+      clearSession();
+      showPage('login');
+      return;
+    }
 
     if (amount > user.balance) {
       alert('Insufficient balance for this withdrawal.');
@@ -841,6 +914,13 @@
     const users = getUsers();
     const user = users[username];
     
+    if (!user) {
+      alert('User data not found. Please login again.');
+      clearSession();
+      showPage('login');
+      return;
+    }
+    
     // Check if trying to add yourself
     if (referralUsername === username) {
       alert('You cannot add yourself as a referral.');
@@ -890,6 +970,13 @@
     const users = getUsers();
     const user = users[username];
     
+    if (!user) {
+      alert('User data not found. Please login again.');
+      clearSession();
+      showPage('login');
+      return;
+    }
+    
     // Referral link
     const referralLink = `${location.origin}${location.pathname}?ref=${username}`;
     $('referral-link-page').textContent = referralLink;
@@ -909,9 +996,14 @@
     }
   }
 
-  // On load: check URL param ref to autofill referral on register
+  // On load: initialize data and setup event listeners
   window.addEventListener('load', () => {
+    initializeData();
     updateNavButtons();
+    
+    // Setup referral link copy functionality
+    setupReferralLinkCopy($('referral-link'));
+    setupReferralLinkCopy($('referral-link-page'));
 
     const urlParams = new URLSearchParams(window.location.search);
     const ref = urlParams.get('ref');
@@ -919,7 +1011,13 @@
       showPage('register');
       $('reg-referral').value = ref.toLowerCase();
     } else {
-      showPage('home');
+      // Check if user is logged in
+      const sessionUser = getSessionUser();
+      if (sessionUser) {
+        showPage('dashboard');
+      } else {
+        showPage('home');
+      }
     }
   });
 </script>
