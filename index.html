@@ -608,10 +608,13 @@
     const password = $('login-password').value;
 
     const users = getUsers();
-    if (!users[username] || users[username].password !== password) {
+    const user = users[username];
+    
+    if (!user || user.password !== password) {
       alert('Invalid username or password.');
       return;
     }
+    
     setSessionUser(username);
     alert('Login successful!');
     $('login-form').reset();
