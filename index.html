@@ -432,6 +432,9 @@
           <option value="vip">VIP Plan (10%)</option>
         </select>
         
+        <label for="manual-referral-amount">Referral Deposit Amount ($)</label>
+        <input type="number" id="manual-referral-amount" min="50" step="0.01" placeholder="Enter deposit amount" required />
+        
         <button type="submit">Add Referral</button>
       </form>
     </div>
@@ -529,6 +532,10 @@
   }
   function clearSession() {
     localStorage.removeItem('nafanest_session');
+  }
+  function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   // Compute estimated daily profit based on plan & balance
@@ -660,12 +667,6 @@
     // Team count
     const teamCount = user.team.length;
     $('team-count').textContent = `You have ${teamCount} referral${teamCount !== 1 ? 's' : ''}.`;
-  }
-
-  // Capitalize string
-  function capitalize(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   // Copy referral link on click
@@ -813,6 +814,7 @@
     e.preventDefault();
     const referralUsername = $('manual-referral-username').value.trim().toLowerCase();
     const plan = $('manual-referral-plan').value;
+    const amount = parseFloat($('manual-referral-amount').value);
     
     if (!referralUsername) {
       alert('Please enter a referral username');
@@ -821,6 +823,11 @@
     
     if (!plan) {
       alert('Please select a plan for bonus calculation');
+      return;
+    }
+    
+    if (!amount || amount < 50) {
+      alert('Please enter a valid deposit amount (minimum $50)');
       return;
     }
     
@@ -857,13 +864,8 @@
     };
     const bonusRate = referralRates[plan];
     
-    // Calculate bonus amount (5% of the minimum deposit for the selected plan)
-    const minDeposits = {
-      basic: 50,
-      premium: 500,
-      vip: 5000
-    };
-    const bonusAmount = minDeposits[plan] * bonusRate;
+    // Calculate bonus amount based on entered deposit amount
+    const bonusAmount = amount * bonusRate;
     
     // Add bonus to referrer's balance
     user.balance += bonusAmount;
