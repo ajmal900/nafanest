@@ -1,797 +1,1282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Nafanest Investment Platform</title>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5f7fa;
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-  }
-  header {
-    background: #2c3e50;
-    color: white;
-    padding: 15px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap;
-  }
-  header h1 {
-    margin: 0; font-weight: 700; font-size: 24px;
-  }
-  nav {
-    display: flex; gap: 12px; flex-wrap: wrap;
-  }
-  nav button {
-    background: #3498db;
-    border: none;
-    padding: 10px 18px;
-    color: white;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  nav button:hover {
-    background: #2980b9;
-  }
-  main {
-    flex-grow: 1;
-    max-width: 600px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 12px;
-    padding: 25px 20px;
-    box-shadow: 0 6px 15px rgb(0 0 0 / 0.1);
-  }
-  .hidden {
-    display: none !important;
-  }
-  /* Home page */
-  .home-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .home-header h2 {
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 10px;
-  }
-  .home-header p {
-    font-weight: 500;
-    color: #34495e;
-  }
-  .plans {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-  }
-  .plan {
-    border-radius: 15px;
-    padding: 20px;
-    width: 180px;
-    box-shadow: 0 6px 15px rgb(0 0 0 / 0.1);
-    color: white;
-    font-weight: 600;
-    cursor: default;
-    user-select: none;
-  }
-  .plan.basic {
-    background: #3498db;
-  }
-  .plan.premium {
-    background: #e67e22;
-  }
-  .plan.vip {
-    background: #9b59b6;
-  }
-  .plan h3 {
-    margin: 0 0 10px;
-    font-size: 22px;
-  }
-  .plan p {
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-  /* Form styles */
-  form {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  form label {
-    display: block;
-    margin-top: 15px;
-    font-weight: 600;
-    color: #34495e;
-  }
-  form input, form select {
-    width: 100%;
-    padding: 10px 12px;
-    margin-top: 6px;
-    border-radius: 6px;
-    border: 1.5px solid #ccc;
-    font-size: 16px;
-  }
-  form button {
-    margin-top: 25px;
-    width: 100%;
-    background: #27ae60;
-    border: none;
-    padding: 12px;
-    font-size: 18px;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-    transition: background 0.3s;
-  }
-  form button:hover {
-    background: #219150;
-  }
-  .info-text {
-    font-size: 14px;
-    color: #7f8c8d;
-    margin-top: 10px;
-  }
-  /* Dashboard cards */
-  .dashboard-card {
-    background: #3498db;
-    color: white;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 6px 15px rgb(52 152 219 / 0.4);
-  }
-  .dashboard-card.premium {
-    background: #e67e22;
-  }
-  .dashboard-card.vip {
-    background: #9b59b6;
-  }
-  .dashboard-card h2 {
-    margin: 0 0 10px;
-    font-size: 20px;
-    font-weight: 700;
-  }
-  .dashboard-card p {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-  }
-  .referral-section {
-    background: #2ecc71;
-    color: white;
-    padding: 15px 20px;
-    border-radius: 10px;
-    font-weight: 600;
-    word-break: break-word;
-    cursor: pointer;
-    user-select: all;
-  }
-  .team-section {
-    margin-top: 15px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
-    color: #34495e;
-  }
-  /* Withdraw & Deposit instructions */
-  .instructions {
-    background: #ecf0f1;
-    border-radius: 12px;
-    padding: 20px;
-    font-size: 16px;
-    color: #2c3e50;
-    line-height: 1.5;
-  }
-  .instructions strong {
-    display: block;
-    margin-top: 10px;
-    margin-bottom: 6px;
-  }
-  a.telegram-link {
-    display: inline-block;
-    margin-top: 15px;
-    background: #0088cc;
-    color: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 700;
-    transition: background 0.3s;
-  }
-  a.telegram-link:hover {
-    background: #006699;
-  }
-  .wallet-address {
-    background: #f1c40f;
-    color: #2c3e50;
-    padding: 10px;
-    border-radius: 6px;
-    font-family: monospace;
-    font-weight: bold;
-    word-break: break-all;
-    text-align: center;
-    margin: 10px 0;
-  }
-  /* Responsive */
-  @media (max-width: 640px) {
-    main {
-      margin: 15px 10px;
-      padding: 20px 15px;
-    }
-    .plans {
-      flex-direction: column;
-      align-items: center;
-    }
-    .plan {
-      width: 90%;
-      max-width: 320px;
-    }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nafanest - Investment Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 4rem 0;
+        }
+        .plan-card {
+            border-radius: 10px;
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            border-bottom: 3px solid var(--primary);
+        }
+        .dashboard-card {
+            border-radius: 10px;
+            color: white;
+        }
+        .balance-card {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+        .profit-card {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+        }
+        .team-card {
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+        }
+        .investment-card {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        }
+        #logout-btn {
+            display: none;
+        }
+        .team-member {
+            border-left: 3px solid var(--primary);
+            padding-left: 15px;
+            margin-bottom: 10px;
+        }
+        .team-member.active {
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+        .referral-status {
+            font-size: 0.8rem;
+            color: #28a745;
+        }
+        .plan-selected {
+            border: 2px solid var(--primary);
+            background-color: rgba(108, 92, 231, 0.05);
+        }
+        .referral-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid #28a745;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        .referral-error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">Nafanest</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="home-tab">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="dashboard-tab">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="deposit-tab">Deposit</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="withdraw-tab">Withdraw</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="support-tab">Support</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="login-tab">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="register-tab">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logout-btn">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-<header>
-  <h1>Nafanest</h1>
-  <nav id="nav-buttons">
-    <button data-page="home">Home</button>
-    <button data-page="register" id="nav-register">Register</button>
-    <button data-page="login" id="nav-login">Login</button>
-    <button data-page="dashboard" id="nav-dashboard" class="hidden">Dashboard</button>
-    <button data-page="deposit" id="nav-deposit" class="hidden">Deposit</button>
-    <button data-page="withdraw" id="nav-withdraw" class="hidden">Withdraw</button>
-    <button data-page="referral" id="nav-referral" class="hidden">Referral</button>
-    <button id="nav-logout" class="hidden">Logout</button>
-  </nav>
-</header>
+    <!-- Home Page Content -->
+    <div id="home-content" class="tab-content">
+        <!-- Hero Section -->
+        <section class="hero-section text-center">
+            <div class="container">
+                <h1 class="display-4 fw-bold mb-3">A place to grow your money</h1>
+                <p class="lead mb-4">Join thousands of investors earning daily returns with our secure platform</p>
+                <a href="#" class="btn btn-light btn-lg px-4 me-2" id="register-hero-btn">Get Started</a>
+                <a href="#" class="btn btn-outline-light btn-lg px-4" id="login-hero-btn">Login</a>
+            </div>
+        </section>
 
-<main id="page-content">
+        <!-- About Section -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h2 class="fw-bold mb-4">About Nafanest</h2>
+                        <p class="lead">Nafanest is a trusted investment platform helping people grow their money through cryptocurrency investments.</p>
+                        <p>Our automated system ensures you earn daily returns on your investments with complete transparency and security.</p>
+                        <div class="mt-4">
+                            <h5 class="fw-bold"><i class="bi bi-people-fill me-2"></i> Referral Program</h5>
+                            <p>Invite friends and earn <span class="badge bg-success">5% commission</span> on every deposit they make!</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <img src="https://cdn.glitch.global/c8cba390-ff4c-40b7-b8cb-45b8e019cb7b/ChatGPT%20Image%20May%2030%2C%202025%2C%2006_38_00%20PM.png?v=1748662931662" alt="About Nafanest" class="img-fluid rounded">
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  <!-- Home Page -->
-  <section id="home" class="page-section">
-    <div class="home-header">
-      <h2>Nafanest — A Place to Grow Your Money</h2>
-      <p>Join thousands of investors earning daily returns with our secure platform</p>
+        <!-- ROI Plans Section -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-5">Our Investment Plans</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="plan-card p-4 text-center h-100" id="basic-plan">
+                            <h3 class="fw-bold">Basic Plan</h3>
+                            <h4 class="my-3">$50 - $499</h4>
+                            <div class="bg-primary bg-opacity-10 p-3 rounded mb-3">
+                                <h5 class="text-primary">2.8% - 3% Daily ROI</h5>
+                                <p class="mb-0">For 30 days</p>
+                            </div>
+                            <ul class="list-unstyled text-start mb-4">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Principal returned after plan</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> 24/7 Support</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Instant withdrawals</li>
+                                <li class="mb-2"><i class="bi bi-gift-fill text-info me-2"></i> Referral earnings: 5%</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary w-100 select-plan-btn" data-plan="basic">Invest Now</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="plan-card p-4 text-center h-100" id="premium-plan">
+                            <h3 class="fw-bold">Premium Plan</h3>
+                            <h4 class="my-3">$500 - $4999</h4>
+                            <div class="bg-primary bg-opacity-10 p-3 rounded mb-3">
+                                <h5 class="text-primary">3.5% - 4.5% Daily ROI</h5>
+                                <p class="mb-0">For 45 days</p>
+                            </div>
+                            <ul class="list-unstyled text-start mb-4">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Principal returned after plan</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Priority support</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Instant withdrawals</li>
+                                <li class="mb-2"><i class="bi bi-gift-fill text-info me-2"></i> Referral earnings: 5%</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary w-100 select-plan-btn" data-plan="premium">Invest Now</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="plan-card p-4 text-center h-100" id="vip-plan">
+                            <h3 class="fw-bold">VIP Plan</h3>
+                            <h4 class="my-3">$5000+</h4>
+                            <div class="bg-primary bg-opacity-10 p-3 rounded mb-3">
+                                <h5 class="text-primary">5% - 7% Daily ROI</h5>
+                                <p class="mb-0">For 60 days</p>
+                            </div>
+                            <ul class="list-unstyled text-start mb-4">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Principal returned after plan</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> VIP support</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Instant withdrawals</li>
+                                <li class="mb-2"><i class="bi bi-gift-fill text-info me-2"></i> Referral earnings: 5%</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary w-100 select-plan-btn" data-plan="vip">Invest Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-    <div class="plans">
-      <div class="plan basic">
-        <h3>Basic Plan</h3>
-        <p><strong>$50 - $499</strong></p>
-        <p>3% Daily ROI for 30 days</p>
-        <p>Principal returned after plan</p>
-        <p>24/7 Support</p>
-        <p>Instant withdrawals</p>
-        <p>Referral earnings: 5%</p>
-      </div>
-      <div class="plan premium">
-        <h3>Premium Plan</h3>
-        <p><strong>$500 - $4999</strong></p>
-        <p>5% Daily ROI for 45 days</p>
-        <p>Principal returned after plan</p>
-        <p>Priority Support</p>
-        <p>Instant withdrawals</p>
-        <p>Referral earnings: 8%</p>
-      </div>
-      <div class="plan vip">
-        <h3>VIP Plan</h3>
-        <p><strong>$5000+</strong></p>
-        <p>7% Daily ROI for 60 days</p>
-        <p>Principal returned after plan</p>
-        <p>Personal Manager</p>
-        <p>Instant withdrawals</p>
-        <p>Referral earnings: 10%</p>
-      </div>
+
+    <!-- Dashboard Content -->
+    <div id="dashboard-content" class="tab-content" style="display: none;">
+        <div class="container py-5">
+            <h2 class="fw-bold mb-4">Dashboard</h2>
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="dashboard-card balance-card p-4">
+                        <h5>Total Balance</h5>
+                        <h2>$<span id="total-balance">0.00</span></h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card profit-card p-4">
+                        <h5>Daily Profit</h5>
+                        <h2>$<span id="daily-profit">0.00</span></h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card team-card p-4">
+                        <h5>Team Earnings</h5>
+                        <h2>$<span id="team-earnings">0.00</span></h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card investment-card p-4">
+                        <h5>Total Invested</h5>
+                        <h2>$<span id="total-invested">0.00</span></h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Plan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-table">
+                                <tr>
+                                    <td colspan="5" class="text-center">No transactions yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Referral Program</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Earn 5% commission on every deposit made by your referrals</p>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="referral-link" value="" readonly>
+                                <button class="btn btn-outline-secondary" type="button" id="copy-referral-btn">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Your Referrals: <span id="referral-count">0</span></h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Referral Earnings: $<span id="referral-earnings">0.00</span></h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Your Team</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="team-list" class="mb-3" style="max-height: 200px; overflow-y: auto;">
+                                <p class="text-center">No team members yet</p>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Team members will appear here after they register using your referral code and make their first deposit.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </section>
 
-  <!-- Register Page -->
-  <section id="register" class="page-section hidden">
-    <h2>Register</h2>
-    <form id="register-form" autocomplete="off">
-      <label for="reg-username">Username</label>
-      <input type="text" id="reg-username" required minlength="3" placeholder="Choose a username" />
-      <label for="reg-password">Password</label>
-      <input type="password" id="reg-password" required minlength="6" placeholder="Create a password" />
-      <label for="reg-referral">Referral Username (optional)</label>
-      <input type="text" id="reg-referral" placeholder="Referral username" />
-      <button type="submit">Register</button>
-    </form>
-  </section>
-
-  <!-- Login Page -->
-  <section id="login" class="page-section hidden">
-    <h2>Login</h2>
-    <form id="login-form" autocomplete="off">
-      <label for="login-username">Username</label>
-      <input type="text" id="login-username" required placeholder="Enter your username" />
-      <label for="login-password">Password</label>
-      <input type="password" id="login-password" required placeholder="Enter your password" />
-      <button type="submit">Login</button>
-    </form>
-  </section>
-
-  <!-- Dashboard Page -->
-  <section id="dashboard" class="page-section hidden">
-    <h2>Dashboard</h2>
-    <div id="dashboard-cards">
-      <div class="dashboard-card" id="dashboard-balance">
-        <h2>Balance</h2>
-        <p>$0.00</p>
-      </div>
-      <div class="dashboard-card" id="dashboard-plan">
-        <h2>Investment Plan</h2>
-        <p>None</p>
-      </div>
-      <div class="dashboard-card" id="dashboard-profit">
-        <h2>Estimated Daily Profit</h2>
-        <p>$0.00</p>
-      </div>
+    <!-- Deposit Content -->
+    <div id="deposit-content" class="tab-content" style="display: none;">
+        <div class="container py-5">
+            <h2 class="fw-bold mb-4">Make Deposit</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Deposit via USDT (TRC20)</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="deposit-form">
+                                <div class="mb-3">
+                                    <label for="deposit-amount" class="form-label">Amount (Minimum $50)</label>
+                                    <input type="number" class="form-control" id="deposit-amount" min="50" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="selected-plan" class="form-label">Selected Plan</label>
+                                    <input type="text" class="form-control" id="selected-plan" readonly>
+                                    <small class="text-muted">Select a plan from the home page or <a href="#" id="change-plan-link">change plan</a></small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="okx-id" class="form-label">Your OKX ID (Optional)</label>
+                                    <input type="text" class="form-control" id="okx-id" placeholder="Enter your OKX ID">
+                                </div>
+                                <div class="alert alert-info">
+                                    <h6>Send USDT (TRC20) to:</h6>
+                                    <p class="fw-bold mb-1" id="deposit-address">TKNdjRambuwgd2m6CpXnQMaTsazyZFz3hK</p>
+                                    <p class="small mb-0">Network: TRON TRC20 (TRC20)</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="transaction-hash" class="form-label">Transaction Hash</label>
+                                    <input type="text" class="form-control" id="transaction-hash" placeholder="Enter your transaction hash" required>
+                                    <div class="form-text">After sending USDT, paste the transaction hash here</div>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">Submit Deposit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Deposit Instructions</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item">Enter deposit amount (minimum $50)</li>
+                                <li class="list-group-item">Send exact USDT amount to the TRC20 address shown</li>
+                                <li class="list-group-item">After transaction is completed, paste the transaction hash</li>
+                                <li class="list-group-item">Click "Submit Deposit"</li>
+                                <li class="list-group-item">Your deposit will be verified and ROI will start automatically</li>
+                            </ol>
+                            <div class="alert alert-warning mt-3">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>Important:</strong> Only send USDT via TRC20 network. Sending via other networks may result in permanent loss.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="referral-section" id="referral-link" title="Click to copy referral link" tabindex="0"></div>
-    <div class="team-section" id="team-count"></div>
-  </section>
 
-  <!-- Deposit Page -->
-  <section id="deposit" class="page-section hidden">
-    <h2>Deposit Funds via USDT (TRC20)</h2>
-    <form id="deposit-form" autocomplete="off">
-      <label for="deposit-amount">Amount (Minimum $50)</label>
-      <input type="number" id="deposit-amount" min="50" step="0.01" placeholder="Minimum $50" required />
-      
-      <label for="deposit-plan">Choose Plan</label>
-      <select id="deposit-plan" required>
-        <option value="">Select a plan</option>
-        <option value="basic">Basic Plan</option>
-        <option value="premium">Premium Plan</option>
-        <option value="vip">VIP Plan</option>
-      </select>
-      
-      <label for="okx-id">Your OKX ID (Optional)</label>
-      <input type="text" id="okx-id" placeholder="Enter your OKX ID" />
-      
-      <div class="instructions">
-        <strong>Send USDT (TRC20) to:</strong>
-        <div class="wallet-address">TKNdjRambuwgd2m6CpXnQMaTsazyZFz3hK</div>
-        <p><strong>Network:</strong> TRON TRC20 (TRC20)</p>
+    <!-- Withdraw Content -->
+    <div id="withdraw-content" class="tab-content" style="display: none;">
+        <div class="container py-5">
+            <h2 class="fw-bold mb-4">Request Withdrawal</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-warning text-white">
+                            <h5 class="mb-0">Withdraw Funds</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="withdraw-form">
+                                <div class="mb-3">
+                                    <label for="withdraw-amount" class="form-label">Amount (Minimum $10)</label>
+                                    <input type="number" class="form-control" id="withdraw-amount" min="10" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="withdraw-address" class="form-label">USDT (TRC20 Wallet Address</label>
+                                    <input type="text" class="form-control" id="withdraw-address" placeholder="Enter your TRC20 wallet address" required>
+                                </div>
+                                <button type="submit" class="btn btn-warning w-100">Request Withdrawal</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Withdrawal Process</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item">Enter withdrawal amount (minimum $10)</li>
+                                <li class="list-group-item">Provide your USDT (TRC20) wallet address</li>
+                                <li class="list-group-item">Submit withdrawal request</li>
+                                <li class="list-group-item">Contact our Telegram support with your transaction details</li>
+                                <li class="list-group-item">Your withdrawal will be processed within 24 hours</li>
+                            </ol>
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-telegram me-2"></i>
+                                <strong>Telegram Support:</strong> <a href="https://t.me/nafanest_support" target="_blank">@nafanest_support</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Content -->
+    <div id="support-content" class="tab-content" style="display: none;">
+        <div class="container py-5">
+            <h2 class="fw-bold mb-4">Customer Support</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">Contact Us</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h5><i class="bi bi-telegram me-2"></i> Telegram Support</h5>
+                                <p>For fastest response, contact our Telegram support:</p>
+                                <a href="https://t.me/nafanest_support" class="btn btn-primary" target="_blank">
+                                    <i class="bi bi-telegram me-2"></i> @nafanest_support
+                                </a>
+                            </div>
+                            <div class="mb-4">
+                                <h5><i class="bi bi-envelope me-2"></i> Email Support</h5>
+                                <p>For general inquiries:</p>
+                                <a href="mailto:support@nafanest.com" class="btn btn-outline-secondary">
+                                    <i class="bi bi-envelope me-2"></i> support@nafanest.com
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">FAQs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="accordion" id="faqAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                            How do I start earning?
+                                        </button>
+                                    </h2>
+                                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            Make a minimum deposit of $50 USDT (TRC20) and your daily ROI will start automatically after transaction confirmation.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                            When can I withdraw my profits?
+                                        </button>
+                                    </h2>
+                                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            You can withdraw your profits anytime with a minimum withdrawal amount of $10. Withdrawals are processed within 24 hours.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                            How does the referral program work?
+                                        </button>
+                                    </h2>
+                                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            You earn 5% commission on every deposit made by your referrals. Your referral link can be found in your dashboard.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Content -->
+    <div id="login-content" class="tab-content" style="display: none;">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Login to Your Account</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="login-form">
+                                <div class="mb-3">
+                                    <label for="login-email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="login-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="login-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="login-password" required>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="remember-me">
+                                    <label class="form-check-label" for="remember-me">Remember me</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Login</button>
+                            </form>
+                            <div class="text-center mt-3">
+                                <p>Don't have an account? <a href="#" id="register-link">Register here</a></p>
+                                <p><a href="#" id="forgot-password-link">Forgot password?</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Content -->
+    <div id="register-content" class="tab-content" style="display: none;">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Create New Account</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="referral-success" id="referral-success">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <span id="referral-success-msg"></span>
+                            </div>
+                            <div class="referral-error" id="referral-error">
+                                <i class="bi bi-exclamation-circle-fill text-danger me-2"></i>
+                                <span id="referral-error-msg"></span>
+                            </div>
+                            <form id="register-form">
+                                <div class="mb-3">
+                                    <label for="register-email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="register-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="register-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="register-password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="register-confirm-password" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="register-confirm-password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="referral-code" class="form-label">Referral Code (Optional)</label>
+                                    <input type="text" class="form-control" id="referral-code" placeholder="Enter referral code if any">
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="agree-terms" required>
+                                    <label class="form-check-label" for="agree-terms">I agree to the <a href="#">Terms and Conditions</a></label>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">Register</button>
+                            </form>
+                            <div class="text-center mt-3">
+                                <p>Already have an account? <a href="#" id="login-link">Login here</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // User management system
+        const users = JSON.parse(localStorage.getItem('nafanest_users')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('nafanest_current_user')) || null;
+        let selectedPlan = localStorage.getItem('nafanest_selected_plan') || null;
+        let referralEmail = null;
+
+        // Plan details
+        const plans = {
+            basic: {
+                name: "Basic Plan",
+                min: 50,
+                max: 499,
+                dailyRoiMin: 1.2,
+                dailyRoiMax: 1.5,
+                duration: 30
+            },
+            premium: {
+                name: "Premium Plan",
+                min: 500,
+                max: 4999,
+                dailyRoiMin: 1.8,
+                dailyRoiMax: 2.2,
+                duration: 45
+            },
+            vip: {
+                name: "VIP Plan",
+                min: 5000,
+                max: 100000,
+                dailyRoiMin: 2.5,
+                dailyRoiMax: 3.0,
+                duration: 60
+            }
+        };
+
+        // Initialize the UI based on login state
+        function updateUI() {
+            if (currentUser) {
+                // User is logged in
+                document.getElementById('login-tab').style.display = 'none';
+                document.getElementById('register-tab').style.display = 'none';
+                document.getElementById('logout-btn').style.display = 'block';
+                
+                // Show dashboard by default for logged in users
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById('dashboard-content').style.display = 'block';
+                document.querySelectorAll('.nav-link').forEach(navLink => {
+                    navLink.classList.remove('active');
+                });
+                document.getElementById('dashboard-tab').classList.add('active');
+                
+                // Update dashboard with user data
+                document.getElementById('total-balance').textContent = currentUser.balance ? currentUser.balance.toFixed(2) : '0.00';
+                document.getElementById('daily-profit').textContent = currentUser.dailyProfit ? currentUser.dailyProfit.toFixed(2) : '0.00';
+                document.getElementById('team-earnings').textContent = currentUser.teamEarnings ? currentUser.teamEarnings.toFixed(2) : '0.00';
+                document.getElementById('total-invested').textContent = currentUser.totalInvested ? currentUser.totalInvested.toFixed(2) : '0.00';
+                document.getElementById('referral-earnings').textContent = currentUser.referralEarnings ? currentUser.referralEarnings.toFixed(2) : '0.00';
+                document.getElementById('referral-count').textContent = currentUser.teamMembers ? currentUser.teamMembers.length : '0';
+                
+                // Update referral link with user's referral code
+                const referralLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(currentUser.referralCode)}`;
+                document.getElementById('referral-link').value = referralLink;
+                
+                // Update transactions
+                updateTransactions();
+                
+                // Update team members list
+                updateTeamList();
+            } else {
+                // User is logged out
+                document.getElementById('login-tab').style.display = 'block';
+                document.getElementById('register-tab').style.display = 'block';
+                document.getElementById('logout-btn').style.display = 'none';
+                
+                // Show home by default for logged out users
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById('home-content').style.display = 'block';
+                document.querySelectorAll('.nav-link').forEach(navLink => {
+                    navLink.classList.remove('active');
+                });
+                document.getElementById('home-tab').classList.add('active');
+            }
+            
+            // Update selected plan in deposit form if exists
+            if (selectedPlan) {
+                document.getElementById('selected-plan').value = plans[selectedPlan].name;
+            }
+        }
         
-        <label for="tx-hash">Transaction Hash</label>
-        <input type="text" id="tx-hash" required placeholder="Enter your transaction hash" />
+        // Update transactions in dashboard
+        function updateTransactions() {
+            const transactionsTable = document.getElementById('transactions-table');
+            if (!currentUser.transactions || currentUser.transactions.length === 0) {
+                transactionsTable.innerHTML = `<tr><td colspan="5" class="text-center">No transactions yet</td></tr>`;
+                return;
+            }
+            
+            let transactionsHtml = '';
+            currentUser.transactions.forEach(transaction => {
+                transactionsHtml += `
+                    <tr>
+                        <td>${transaction.date}</td>
+                        <td>${transaction.type}</td>
+                        <td>$${transaction.amount.toFixed(2)}</td>
+                        <td><span class="badge ${transaction.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${transaction.status}</span></td>
+                        <td>${transaction.plan || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            transactionsTable.innerHTML = transactionsHtml;
+        }
         
-        <strong>Deposit Instructions:</strong>
-        <ol>
-          <li>Enter deposit amount (minimum $50)</li>
-          <li>Send exact USDT amount to the TRC20 address shown</li>
-          <li>After transaction is completed, paste the transaction hash</li>
-          <li>Click "Submit Deposit"</li>
-          <li>Your deposit will be verified and ROI will start automatically</li>
-        </ol>
-        <p class="info-text"><strong>Important:</strong> Only send USDT via TRC20 network. Sending via other networks may result in permanent loss.</p>
-      </div>
-      
-      <button type="submit">Submit Deposit</button>
-    </form>
-  </section>
+        // Update team members list
+        function updateTeamList() {
+            const teamList = document.getElementById('team-list');
+            if (!currentUser.teamMembers || currentUser.teamMembers.length === 0) {
+                teamList.innerHTML = `<p class="text-center">No team members yet</p>`;
+                return;
+            }
+            
+            let teamHtml = '';
+            currentUser.teamMembers.forEach(member => {
+                teamHtml += `
+                    <div class="team-member ${member.active ? 'active' : ''}">
+                        <div class="d-flex justify-content-between">
+                            <strong>${member.email}</strong>
+                            <span>$${member.totalDeposited ? member.totalDeposited.toFixed(2) : '0.00'}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small>Joined: ${member.joinDate}</small>
+                            <span class="referral-status">${member.active ? 'Active' : 'Pending Deposit'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            teamList.innerHTML = teamHtml;
+        }
 
-  <!-- Withdraw Page -->
-  <section id="withdraw" class="page-section hidden">
-    <h2>Withdraw Funds</h2>
-    <form id="withdraw-form" autocomplete="off">
-      <label for="withdraw-amount">Amount (Minimum $10)</label>
-      <input type="number" id="withdraw-amount" min="10" step="0.01" placeholder="Minimum $10" required />
-      
-      <label for="wallet-address">USDT (TRC20 Wallet Address)</label>
-      <input type="text" id="wallet-address" required placeholder="Enter your TRC20 wallet address" />
-      
-      <div class="instructions">
-        <strong>Withdrawal Process:</strong>
-        <ol>
-          <li>Enter withdrawal amount (minimum $10)</li>
-          <li>Provide your USDT (TRC20) wallet address</li>
-          <li>Submit withdrawal request</li>
-          <li>Contact our Telegram support with your transaction details</li>
-          <li>Your withdrawal will be processed within 24 hours</li>
-        </ol>
-        <a href="https://t.me/nafanest_support" target="_blank" class="telegram-link">Telegram Support: @nafanest_support</a>
-      </div>
-      
-      <button type="submit">Request Withdrawal</button>
-    </form>
-  </section>
+        // Register form submission
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const referralCode = document.getElementById('referral-code').value;
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            // Check if user already exists
+            if (users.find(user => user.email === email)) {
+                alert('User with this email already exists!');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                email,
+                password,
+                balance: 0,
+                dailyProfit: 0,
+                teamEarnings: 0,
+                referralEarnings: 0,
+                totalInvested: 0,
+                referralCode: generateReferralCode(email),
+                teamMembers: [],
+                transactions: [],
+                activeInvestments: []
+            };
+            
+            // Handle referral if code is provided
+            let referrer = null;
+            if (referralCode) {
+                // Try to find referrer by referral code
+                referrer = users.find(user => user.referralCode === referralCode);
+                
+                // If not found by code, try to find by email (for backward compatibility)
+                if (!referrer && referralEmail) {
+                    referrer = users.find(user => user.email === referralEmail);
+                }
+                
+                if (referrer) {
+                    // Add user to referrer's team
+                    referrer.teamMembers.push({
+                        email,
+                        joinDate: new Date().toLocaleDateString(),
+                        totalDeposited: 0,
+                        active: false
+                    });
+                    
+                    // Update referrer in users array
+                    const referrerIndex = users.findIndex(user => user.email === referrer.email);
+                    users[referrerIndex] = referrer;
+                    
+                    // Set referrer for new user
+                    newUser.referrer = referrer.email;
+                    
+                    // Show success message
+                    document.getElementById('referral-success').style.display = 'block';
+                    document.getElementById('referral-success-msg').textContent = `You have been referred by ${referrer.email}`;
+                } else {
+                    document.getElementById('referral-error').style.display = 'block';
+                    document.getElementById('referral-error-msg').textContent = 'Invalid referral code. Please check and try again.';
+                    return;
+                }
+            }
+            
+            users.push(newUser);
+            localStorage.setItem('nafanest_users', JSON.stringify(users));
+            
+            // Log in the new user
+            currentUser = newUser;
+            localStorage.setItem('nafanest_current_user', JSON.stringify(currentUser));
+            
+            alert('Registration successful! You are now logged in.');
+            updateUI();
+            this.reset();
+            
+            // Switch to dashboard
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('dashboard-content').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            document.getElementById('dashboard-tab').classList.add('active');
+        });
+        
+        // Generate referral code from email
+        function generateReferralCode(email) {
+            // Simple hash to create referral code
+            let hash = 0;
+            for (let i = 0; i < email.length; i++) {
+                hash = (hash << 5) - hash + email.charCodeAt(i);
+                hash |= 0; // Convert to 32bit integer
+            }
+            return 'REF' + Math.abs(hash).toString().substring(0, 8);
+        }
 
-  <!-- Referral Page -->
-  <section id="referral" class="page-section hidden">
-    <h2>Your Referral Link</h2>
-    <p>Share this link to invite your friends and earn rewards:</p>
-    <div class="referral-section" id="referral-link-page" title="Click to copy referral link" tabindex="0"></div>
-    <div class="team-section" id="team-list">
-      <h3>Your Referral Team</h3>
-      <ul id="team-members"></ul>
-    </div>
-  </section>
+        // Login form submission
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const rememberMe = document.getElementById('remember-me').checked;
+            
+            // Find user
+            const user = users.find(user => user.email === email && user.password === password);
+            
+            if (!user) {
+                alert('Invalid email or password!');
+                return;
+            }
+            
+            // Log in the user
+            currentUser = user;
+            localStorage.setItem('nafanest_current_user', JSON.stringify(currentUser));
+            
+            if (rememberMe) {
+                localStorage.setItem('nafanest_remember_me', 'true');
+            } else {
+                localStorage.removeItem('nafanest_remember_me');
+            }
+            
+            alert('Login successful!');
+            updateUI();
+            this.reset();
+            
+            // Switch to dashboard
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('dashboard-content').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            document.getElementById('dashboard-tab').classList.add('active');
+        });
 
-</main>
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            currentUser = null;
+            localStorage.removeItem('nafanest_current_user');
+            
+            alert('You have been logged out.');
+            updateUI();
+        });
 
-<script>
-  // --- Data store in localStorage ---
-  // users = {username: {password, balance, plan, referral, team:[], profit, deposits: [], withdrawals: []}}
-  // session = {username}
+        // Tab switching functionality
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.id.replace('-tab', '-content');
+                
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Show selected tab content
+                document.getElementById(tabId).style.display = 'block';
+                
+                // Update active nav link
+                document.querySelectorAll('.nav-link').forEach(navLink => {
+                    navLink.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
 
-  // Helpers
-  function $(id) { return document.getElementById(id); }
-  function showPage(pageId) {
-    document.querySelectorAll('.page-section').forEach(sec => {
-      sec.classList.toggle('hidden', sec.id !== pageId);
-    });
-    updateNavButtons();
-    if (pageId === 'dashboard') renderDashboard();
-    if (pageId === 'referral') renderReferralPage();
-  }
-  function updateNavButtons() {
-    const sessionUser = getSessionUser();
-    const navRegister = $('nav-register');
-    const navLogin = $('nav-login');
-    const navDashboard = $('nav-dashboard');
-    const navDeposit = $('nav-deposit');
-    const navWithdraw = $('nav-withdraw');
-    const navReferral = $('nav-referral');
-    const navLogout = $('nav-logout');
+        // Plan selection functionality
+        document.querySelectorAll('.select-plan-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const plan = this.getAttribute('data-plan');
+                
+                // Highlight selected plan
+                document.querySelectorAll('.plan-card').forEach(card => {
+                    card.classList.remove('plan-selected');
+                });
+                document.getElementById(`${plan}-plan`).classList.add('plan-selected');
+                
+                // Store selected plan
+                selectedPlan = plan;
+                localStorage.setItem('nafanest_selected_plan', plan);
+                
+                // Update deposit form
+                document.getElementById('selected-plan').value = plans[plan].name;
+                
+                // Switch to deposit tab
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById('deposit-content').style.display = 'block';
+                document.querySelectorAll('.nav-link').forEach(navLink => {
+                    navLink.classList.remove('active');
+                });
+                document.getElementById('deposit-tab').classList.add('active');
+                
+                // Set minimum deposit amount based on plan
+                document.getElementById('deposit-amount').min = plans[plan].min;
+            });
+        });
 
-    if (sessionUser) {
-      navRegister.classList.add('hidden');
-      navLogin.classList.add('hidden');
-      navDashboard.classList.remove('hidden');
-      navDeposit.classList.remove('hidden');
-      navWithdraw.classList.remove('hidden');
-      navReferral.classList.remove('hidden');
-      navLogout.classList.remove('hidden');
-    } else {
-      navRegister.classList.remove('hidden');
-      navLogin.classList.remove('hidden');
-      navDashboard.classList.add('hidden');
-      navDeposit.classList.add('hidden');
-      navWithdraw.classList.add('hidden');
-      navReferral.classList.add('hidden');
-      navLogout.classList.add('hidden');
-    }
-  }
-  function getUsers() {
-    return JSON.parse(localStorage.getItem('nafanest_users') || '{}');
-  }
-  function saveUsers(users) {
-    localStorage.setItem('nafanest_users', JSON.stringify(users));
-  }
-  function getSessionUser() {
-    return localStorage.getItem('nafanest_session') || null;
-  }
-  function setSessionUser(username) {
-    localStorage.setItem('nafanest_session', username);
-  }
-  function clearSession() {
-    localStorage.removeItem('nafanest_session');
-  }
+        // Change plan link
+        document.getElementById('change-plan-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Switch to home tab to select plan
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('home-content').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            document.getElementById('home-tab').classList.add('active');
+            
+            // Scroll to plans section
+            document.querySelector('.hero-section').scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
 
-  // Compute estimated daily profit based on plan & balance
-  function computeDailyProfit(user) {
-    if (!user.plan || !user.balance) return 0;
-    const plans = {
-      basic: 0.03,
-      premium: 0.05,
-      vip: 0.07
-    };
-    let roi = plans[user.plan.toLowerCase()] || 0;
-    return user.balance * roi;
-  }
+        // Special buttons that switch tabs
+        document.getElementById('register-hero-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('register-content').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            document.getElementById('register-tab').classList.add('active');
+        });
 
-  // Register form handler
-  $('register-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const username = $('reg-username').value.trim().toLowerCase();
-    const password = $('reg-password').value;
-    const referral = $('reg-referral').value.trim().toLowerCase();
+        document.getElementById('login-hero-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('login-content').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            document.getElementById('login-tab').classList.add('active');
+        });
 
-    if (username.length < 3) {
-      alert('Username must be at least 3 characters.');
-      return;
-    }
-    if (password.length < 6) {
-      alert('Password must be at least 6 characters.');
-      return;
-    }
+        // Links between login and register forms
+        document.getElementById('register-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('register-content').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            document.getElementById('register-tab').classList.add('active');
+        });
 
-    const users = getUsers();
-    if (users[username]) {
-      alert('Username already exists. Please choose another.');
-      return;
-    }
+        document.getElementById('login-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('login-content').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            document.getElementById('login-tab').classList.add('active');
+        });
 
-    // Create new user
-    users[username] = {
-      password: password,
-      balance: 0,
-      plan: '',
-      referral: referral || '',
-      team: [],
-      profit: 0,
-      deposits: [],
-      withdrawals: []
-    };
+        // Copy referral link
+        document.getElementById('copy-referral-btn').addEventListener('click', function() {
+            const referralInput = document.getElementById('referral-link');
+            referralInput.select();
+            document.execCommand('copy');
+            alert('Referral link copied to clipboard!');
+        });
 
-    // Add to referral team if referral exists and add referral bonus
-    if (referral && users[referral]) {
-      users[referral].team.push(username);
-      
-      // Calculate referral bonus based on referrer's plan
-      const referrerPlan = users[referral].plan || 'basic';
-      const referralRates = {
-        basic: 0.05,
-        premium: 0.08,
-        vip: 0.10
-      };
-      const bonusRate = referralRates[referrerPlan];
-      
-      // For demo, we'll add a $10 bonus (in real app, this would be based on deposit amount)
-      users[referral].balance += 10;
-      users[referral].profit = computeDailyProfit(users[referral]);
-    }
+        // Form submissions (simplified for demo)
+        document.getElementById('deposit-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            const txHash = document.getElementById('transaction-hash').value;
+            
+            if (!selectedPlan) {
+                alert('Please select an investment plan first');
+                return;
+            }
+            
+            if (amount < plans[selectedPlan].min) {
+                alert(`Minimum deposit for ${plans[selectedPlan].name} is $${plans[selectedPlan].min}`);
+                return;
+            }
+            
+            if (amount > plans[selectedPlan].max) {
+                alert(`Maximum deposit for ${plans[selectedPlan].name} is $${plans[selectedPlan].max}`);
+                return;
+            }
+            
+            if (!txHash) {
+                alert('Please enter your transaction hash');
+                return;
+            }
+            
+            if (currentUser) {
+                // Update user balance
+                currentUser.balance = (parseFloat(currentUser.balance) || 0) + amount;
+                currentUser.totalInvested = (parseFloat(currentUser.totalInvested) || 0) + amount;
+                
+                // Add active investment
+                const dailyRoi = plans[selectedPlan].dailyRoiMin + 
+                    (Math.random() * (plans[selectedPlan].dailyRoiMax - plans[selectedPlan].dailyRoiMin));
+                
+                currentUser.activeInvestments.push({
+                    plan: selectedPlan,
+                    amount: amount,
+                    startDate: new Date().toLocaleDateString(),
+                    endDate: new Date(Date.now() + plans[selectedPlan].duration * 24 * 60 * 60 * 1000).toLocaleDateString(),
+                    dailyRoi: dailyRoi,
+                    daysRemaining: plans[selectedPlan].duration
+                });
+                
+                // Add transaction
+                currentUser.transactions.push({
+                    date: new Date().toLocaleDateString(),
+                    type: 'Deposit',
+                    amount: amount,
+                    status: 'Completed',
+                    plan: plans[selectedPlan].name
+                });
+                
+                // Find referrer and add commission
+                if (currentUser.referrer) {
+                    const referrer = users.find(user => user.email === currentUser.referrer);
+                    if (referrer) {
+                        const commission = amount * 0.05; // 5% commission
+                        referrer.balance = (parseFloat(referrer.balance) || 0) + commission;
+                        referrer.teamEarnings = (parseFloat(referrer.teamEarnings) || 0) + commission;
+                        referrer.referralEarnings = (parseFloat(referrer.referralEarnings) || 0) + commission;
+                        
+                        // Update referrer's team member status
+                        const memberIndex = referrer.teamMembers.findIndex(m => m.email === currentUser.email);
+                        if (memberIndex !== -1) {
+                            referrer.teamMembers[memberIndex].active = true;
+                            referrer.teamMembers[memberIndex].totalDeposited = 
+                                (parseFloat(referrer.teamMembers[memberIndex].totalDeposited) || 0) + amount;
+                        }
+                        
+                        // Update referrer in users array
+                        const referrerIndex = users.findIndex(user => user.email === referrer.email);
+                        users[referrerIndex] = referrer;
+                        
+                        // Add commission transaction for referrer
+                        referrer.transactions.push({
+                            date: new Date().toLocaleDateString(),
+                            type: 'Referral Commission',
+                            amount: commission,
+                            status: 'Completed'
+                        });
+                    }
+                }
+                
+                // Save changes
+                const userIndex = users.findIndex(user => user.email === currentUser.email);
+                users[userIndex] = currentUser;
+                localStorage.setItem('nafanest_users', JSON.stringify(users));
+                localStorage.setItem('nafanest_current_user', JSON.stringify(currentUser));
+                
+                updateUI();
+            }
+            
+            alert(`Deposit of $${amount} submitted for ${plans[selectedPlan].name}! Your investment is now active.`);
+            this.reset();
+            selectedPlan = null;
+            localStorage.removeItem('nafanest_selected_plan');
+            document.getElementById('selected-plan').value = '';
+        });
 
-    saveUsers(users);
-    alert('Registration successful! Please login.');
-    showPage('login');
-    $('register-form').reset();
-  });
+        document.getElementById('withdraw-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const address = document.getElementById('withdraw-address').value;
+            
+            if (currentUser) {
+                if (amount > parseFloat(currentUser.balance)) {
+                    alert('Insufficient balance for this withdrawal');
+                    return;
+                }
+                
+                if (amount < 10) {
+                    alert('Minimum withdrawal amount is $10');
+                    return;
+                }
+                
+                // Update user balance
+                currentUser.balance = (parseFloat(currentUser.balance) || 0) - amount;
+                
+                // Add transaction
+                currentUser.transactions.push({
+                    date: new Date().toLocaleDateString(),
+                    type: 'Withdrawal',
+                    amount: amount,
+                    status: 'Pending'
+                });
+                
+                // Save changes
+                const userIndex = users.findIndex(user => user.email === currentUser.email);
+                users[userIndex] = currentUser;
+                localStorage.setItem('nafanest_users', JSON.stringify(users));
+                localStorage.setItem('nafanest_current_user', JSON.stringify(currentUser));
+                
+                updateUI();
+            }
+            
+            alert(`Withdrawal request of $${amount} submitted! Please contact our Telegram support with your transaction details.`);
+            this.reset();
+        });
 
-  // Login form handler
-  $('login-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const username = $('login-username').value.trim().toLowerCase();
-    const password = $('login-password').value;
+        // Check for referral code in URL on page load
+        function checkForReferralCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refParam = urlParams.get('ref');
+            
+            if (refParam) {
+                // Try to find if refParam is a valid referral code
+                const referrer = users.find(user => user.referralCode === refParam);
+                
+                if (referrer) {
+                    // Set the referral code in the form
+                    document.getElementById('referral-code').value = refParam;
+                    referralEmail = referrer.email;
+                    
+                    // If we're not on register page, switch to it
+                    if (!window.location.hash.includes('register-content')) {
+                        document.querySelectorAll('.tab-content').forEach(content => {
+                            content.style.display = 'none';
+                        });
+                        document.getElementById('register-content').style.display = 'block';
+                        document.querySelectorAll('.nav-link').forEach(navLink => {
+                            navLink.classList.remove('active');
+                        });
+                        document.getElementById('register-tab').classList.add('active');
+                    }
+                    
+                    // Show success message
+                    document.getElementById('referral-success').style.display = 'block';
+                    document.getElementById('referral-success-msg').textContent = `You have been referred by ${referrer.email}`;
+                } else {
+                    // If not found by code, try by email
+                    const referrerByEmail = users.find(user => user.email === refParam);
+                    if (referrerByEmail) {
+                        // Set the referral code in the form
+                        document.getElementById('referral-code').value = referrerByEmail.referralCode;
+                        referralEmail = referrerByEmail.email;
+                        
+                        // If we're not on register page, switch to it
+                        if (!window.location.hash.includes('register-content')) {
+                            document.querySelectorAll('.tab-content').forEach(content => {
+                                content.style.display = 'none';
+                            });
+                            document.getElementById('register-content').style.display = 'block';
+                            document.querySelectorAll('.nav-link').forEach(navLink => {
+                                navLink.classList.remove('active');
+                            });
+                            document.getElementById('register-tab').classList.add('active');
+                        }
+                        
+                        // Show success message
+                        document.getElementById('referral-success').style.display = 'block';
+                        document.getElementById('referral-success-msg').textContent = `You have been referred by ${referrerByEmail.email}`;
+                    } else {
+                        // If not found at all, show error message
+                        document.getElementById('referral-error').style.display = 'block';
+                        document.getElementById('referral-error-msg').textContent = 'Invalid referral code. Please check the link.';
+                    }
+                }
+            }
+        }
 
-    const users = getUsers();
-    if (!users[username] || users[username].password !== password) {
-      alert('Invalid username or password.');
-      return;
-    }
-    setSessionUser(username);
-    alert('Login successful!');
-    $('login-form').reset();
-    showPage('dashboard');
-  });
-
-  // Logout handler
-  $('nav-logout').addEventListener('click', () => {
-    if (confirm('Are you sure you want to logout?')) {
-      clearSession();
-      showPage('home');
-    }
-  });
-
-  // Navigation button handler
-  document.getElementById('nav-buttons').addEventListener('click', e => {
-    if (e.target.tagName === 'BUTTON' && e.target.dataset.page) {
-      showPage(e.target.dataset.page);
-    }
-  });
-
-  // Render dashboard info
-  function renderDashboard() {
-    const username = getSessionUser();
-    if (!username) return;
-
-    const users = getUsers();
-    const user = users[username];
-
-    // Balance
-    $('dashboard-balance').querySelector('p').textContent = `$${user.balance.toFixed(2)}`;
-    // Plan
-    $('dashboard-plan').querySelector('p').textContent = user.plan ? capitalize(user.plan) + ' Plan' : 'None';
-    // Estimated profit
-    const profit = computeDailyProfit(user);
-    $('dashboard-profit').querySelector('p').textContent = `$${profit.toFixed(2)}`;
-
-    // Referral link
-    const referralLink = `${location.origin}${location.pathname}?ref=${username}`;
-    const refLinkEl = $('referral-link');
-    refLinkEl.textContent = referralLink;
-
-    // Team count
-    const teamCount = user.team.length;
-    $('team-count').textContent = `You have ${teamCount} referral${teamCount !== 1 ? 's' : ''}.`;
-  }
-
-  // Capitalize string
-  function capitalize(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  // Copy referral link on click
-  $('referral-link').addEventListener('click', () => {
-    copyReferralLink($('referral-link').textContent);
-  });
-  $('referral-link').addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      copyReferralLink($('referral-link').textContent);
-    }
-  });
-  $('referral-link-page').addEventListener('click', () => {
-    copyReferralLink($('referral-link-page').textContent);
-  });
-  $('referral-link-page').addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      copyReferralLink($('referral-link-page').textContent);
-    }
-  });
-  function copyReferralLink(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Referral link copied to clipboard!');
-    }).catch(() => {
-      alert('Failed to copy. Please copy manually.');
-    });
-  }
-
-  // Deposit form handler
-  $('deposit-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const amount = parseFloat($('deposit-amount').value);
-    const plan = $('deposit-plan').value;
-    const okxId = $('okx-id').value.trim();
-    const txHash = $('tx-hash').value.trim();
-
-    if (!plan) {
-      alert('Please select an investment plan.');
-      return;
-    }
-    const minAmounts = { basic: 50, premium: 500, vip: 5000 };
-    if (amount < minAmounts[plan]) {
-      alert(`Minimum deposit for ${capitalize(plan)} Plan is $${minAmounts[plan]}.`);
-      return;
-    }
-    if (!txHash) {
-      alert('Please enter your transaction hash.');
-      return;
-    }
-
-    // Update user balance and plan
-    const username = getSessionUser();
-    if (!username) {
-      alert('You must be logged in to deposit.');
-      showPage('login');
-      return;
-    }
-    const users = getUsers();
-    const user = users[username];
-
-    // Record deposit
-    user.deposits.push({
-      amount: amount,
-      plan: plan,
-      date: new Date().toISOString(),
-      txHash: txHash,
-      okxId: okxId,
-      status: 'pending'
-    });
-
-    // Update balance and plan
-    user.balance = amount;
-    user.plan = plan;
-    user.profit = computeDailyProfit(user);
-
-    // Add referral bonus if applicable
-    if (user.referral && users[user.referral]) {
-      const referrer = users[user.referral];
-      const referralRates = {
-        basic: 0.05,
-        premium: 0.08,
-        vip: 0.10
-      };
-      const bonusRate = referralRates[referrer.plan || 'basic'];
-      const bonusAmount = amount * bonusRate;
-      
-      referrer.balance += bonusAmount;
-      referrer.profit = computeDailyProfit(referrer);
-    }
-
-    saveUsers(users);
-    alert(`Successfully deposited $${amount.toFixed(2)} to ${capitalize(plan)} Plan. Your deposit is pending verification.`);
-    $('deposit-form').reset();
-    showPage('dashboard');
-  });
-
-  // Withdraw form handler
-  $('withdraw-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const amount = parseFloat($('withdraw-amount').value);
-    const walletAddress = $('wallet-address').value.trim();
-
-    if (amount < 10) {
-      alert('Minimum withdrawal amount is $10.');
-      return;
-    }
-    if (!walletAddress) {
-      alert('Please enter your USDT (TRC20) wallet address.');
-      return;
-    }
-
-    const username = getSessionUser();
-    if (!username) {
-      alert('You must be logged in to withdraw.');
-      showPage('login');
-      return;
-    }
-    const users = getUsers();
-    const user = users[username];
-
-    if (amount > user.balance) {
-      alert('Insufficient balance for this withdrawal.');
-      return;
-    }
-
-    // Record withdrawal
-    user.withdrawals.push({
-      amount: amount,
-      walletAddress: walletAddress,
-      date: new Date().toISOString(),
-      status: 'pending'
-    });
-
-    // Update balance (in real app, this would happen after admin approval)
-    user.balance -= amount;
-    user.profit = computeDailyProfit(user);
-
-    saveUsers(users);
-    alert(`Withdrawal request for $${amount.toFixed(2)} submitted. Please contact support on Telegram to complete the process.`);
-    $('withdraw-form').reset();
-    showPage('dashboard');
-  });
-
-  // Render Referral page
-  function renderReferralPage() {
-    const username = getSessionUser();
-    if (!username) return;
-    
-    const users = getUsers();
-    const user = users[username];
-    
-    // Referral link
-    const referralLink = `${location.origin}${location.pathname}?ref=${username}`;
-    $('referral-link-page').textContent = referralLink;
-    
-    // Team members
-    const teamList = $('team-members');
-    teamList.innerHTML = '';
-    
-    if (user.team.length === 0) {
-      teamList.innerHTML = '<li>No referrals yet</li>';
-    } else {
-      user.team.forEach(member => {
-        const li = document.createElement('li');
-        li.textContent = member;
-        teamList.appendChild(li);
-      });
-    }
-  }
-
-  // On load: check URL param ref to autofill referral on register
-  window.addEventListener('load', () => {
-    updateNavButtons();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const ref = urlParams.get('ref');
-    if (ref) {
-      showPage('register');
-      $('reg-referral').value = ref.toLowerCase();
-    } else {
-      showPage('home');
-    }
-  });
-</script>
-
+        // Initialize the UI when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+            checkForReferralCode();
+            
+            // Check if there's a remembered user
+            if (localStorage.getItem('nafanest_remember_me') && !currentUser) {
+                // You could implement auto-login here if desired
+            }
+            
+            // Simulate daily profit calculation (for demo purposes)
+            if (currentUser && currentUser.activeInvestments && currentUser.activeInvestments.length > 0) {
+                // Calculate daily profits
+                let totalDailyProfit = 0;
+                currentUser.activeInvestments.forEach(investment => {
+                    if (investment.daysRemaining > 0) {
+                        const dailyProfit = investment.amount * (investment.dailyRoi / 100);
+                        totalDailyProfit += dailyProfit;
+                        investment.daysRemaining--;
+                    }
+                });
+                
+                if (totalDailyProfit > 0) {
+                    currentUser.balance = (parseFloat(currentUser.balance) || 0) + totalDailyProfit;
+                    currentUser.dailyProfit = totalDailyProfit;
+                    
+                    // Add profit transaction
+                    currentUser.transactions.push({
+                        date: new Date().toLocaleDateString(),
+                        type: 'Daily Profit',
+                        amount: totalDailyProfit,
+                        status: 'Completed'
+                    });
+                    
+                    // Save changes
+                    const userIndex = users.findIndex(user => user.email === currentUser.email);
+                    users[userIndex] = currentUser;
+                    localStorage.setItem('nafanest_users', JSON.stringify(users));
+                    localStorage.setItem('nafanest_current_user', JSON.stringify(currentUser));
+                    
+                    updateUI();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
