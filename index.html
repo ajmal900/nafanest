@@ -226,6 +226,20 @@
     background: #f8f9fa;
     border-radius: 8px;
   }
+  /* Claim Profit Button */
+  #claim-profit-btn {
+    background: #27ae60 !important;
+    transition: background 0.3s;
+    cursor: pointer;
+    text-align: center;
+  }
+  #claim-profit-btn:hover {
+    background: #219150 !important;
+  }
+  #claim-profit-btn:disabled {
+    background: #95a5a6 !important;
+    cursor: not-allowed !important;
+  }
   /* Responsive */
   @media (max-width: 640px) {
     main {
@@ -343,6 +357,15 @@
     </div>
     <div class="referral-section" id="referral-link" title="Click to copy referral link" tabindex="0"></div>
     <div class="team-section" id="team-count"></div>
+    
+    <!-- Daily Profit Claim Section -->
+    <div id="claim-section" class="hidden">
+      <button id="claim-profit-btn" class="dashboard-card">
+        <h2>Claim Daily Profit</h2>
+        <p id="claim-amount">$0.00</p>
+        <p id="next-claim-time" style="font-size: 14px;"></p>
+      </button>
+    </div>
   </section>
 
   <!-- Deposit Page -->
@@ -471,6 +494,7 @@
           referral: '',
           team: ['testuser'],
           profit: 70,
+          lastClaimTime: new Date(Date.now() - 86400000).toISOString(), // 24 hours ago
           deposits: [{amount: 1000, plan: 'vip', date: new Date().toISOString(), txHash: 'abc123', status: 'verified'}],
           withdrawals: []
         },
@@ -482,6 +506,7 @@
           referral: 'admin',
           team: [],
           profit: 25,
+          lastClaimTime: new Date(Date.now() - 86400000).toISOString(), // 24 hours ago
           deposits: [{amount: 500, plan: 'premium', date: new Date().toISOString(), txHash: 'def456', status: 'verified'}],
           withdrawals: []
         }
@@ -603,6 +628,26 @@
     return user.balance * roi;
   }
 
+  // Helper functions for claim feature
+  function getNextClaimTime(lastClaimTime) {
+    if (!lastClaimTime) return new Date();
+    const nextTime = new Date(lastClaimTime);
+    nextTime.setDate(nextTime.getDate() + 1);
+    return nextTime;
+  }
+
+  function canClaimProfit(lastClaimTime) {
+    if (!lastClaimTime) return true;
+    const now = new Date();
+    const nextClaimTime = getNextClaimTime(lastClaimTime);
+    return now >= nextClaimTime;
+  }
+
+  function formatTime(date) {
+    if (!date) return '';
+    return date.toLocaleString();
+  }
+
   // Register form handler
   $('register-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -639,6 +684,7 @@
       referral: referral || '',
       team: [],
       profit: 0,
+      lastClaimTime: null,
       deposits: [],
       withdrawals: []
     };
@@ -733,7 +779,63 @@
     // Team count
     const teamCount = user.team.length;
     $('team-count').textContent = `You have ${teamCount} referral${teamCount !== 1 ? 's' : ''}.`;
+
+    // Show/hide claim section based on having a plan
+    const claimSection = $('claim-section');
+    if (user.plan) {
+      claimSection.classList.remove('hidden');
+      
+      // Calculate profit and next claim time
+      const profitAmount = computeDailyProfit(user);
+      $('claim-amount').textContent = `$${profitAmount.toFixed(2)}`;
+      
+      const now = new Date();
+      const nextClaimTime = getNextClaimTime(user.lastClaimTime);
+      const canClaim = canClaimProfit(user.lastClaimTime);
+      
+      const claimBtn = $('claim-profit-btn');
+      claimBtn.disabled = !canClaim;
+      
+      if (canClaim) {
+        $('next-claim-time').textContent = 'Available now!';
+      } else {
+        $('next-claim-time').textContent = `Next claim: ${formatTime(nextClaimTime)}`;
+      }
+    } else {
+      claimSection.classList.add('hidden');
+    }
   }
+
+  // Claim profit button handler
+  $('claim-profit-btn').addEventListener('click', () => {
+    const username = getSessionUser();
+    if (!username) return;
+    
+    const users = getUsers();
+    const user = users[username];
+    
+    if (!user || !user.plan) return;
+    
+    // Check if can claim
+    if (!canClaimProfit(user.lastClaimTime)) {
+      alert('You can only claim profit once every 24 hours.');
+      return;
+    }
+    
+    const profitAmount = computeDailyProfit(user);
+    if (profitAmount <= 0) {
+      alert('No profit available to claim.');
+      return;
+    }
+    
+    // Update user balance and last claim time
+    user.balance += profitAmount;
+    user.lastClaimTime = new Date().toISOString();
+    
+    saveUsers(users);
+    alert(`Successfully claimed $${profitAmount.toFixed(2)} profit!`);
+    renderDashboard();
+  });
 
   // Copy referral link on click
   function setupReferralLinkCopy(element) {
