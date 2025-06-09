@@ -240,11 +240,14 @@
     background: #95a5a6 !important;
     cursor: not-allowed !important;
   }
-  /* History Tables */
+  /* Withdrawal History */
+  .history-section {
+    margin-top: 30px;
+  }
   .history-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
+    margin-top: 10px;
   }
   .history-table th, .history-table td {
     padding: 10px;
@@ -254,6 +257,29 @@
   .history-table th {
     background-color: #f2f2f2;
     font-weight: 600;
+  }
+  .status-pending {
+    color: #e67e22;
+    font-weight: 600;
+  }
+  .status-completed {
+    color: #27ae60;
+    font-weight: 600;
+  }
+  .status-failed {
+    color: #e74c3c;
+    font-weight: 600;
+  }
+  /* Available Profit Section */
+  .available-profit {
+    background: #2ecc71;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
   }
   /* Responsive */
   @media (max-width: 640px) {
@@ -384,24 +410,6 @@
         <p id="next-claim-time" style="font-size: 14px;"></p>
       </button>
     </div>
-    
-    <!-- Withdrawal History -->
-    <div id="withdrawal-history" class="hidden">
-      <h3>Withdrawal History</h3>
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th>Amount</th>
-            <th>Wallet</th>
-            <th>Date</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="withdrawal-history-body">
-          <!-- Will be populated by JavaScript -->
-        </tbody>
-      </table>
-    </div>
   </section>
 
   <!-- Deposit Page -->
@@ -443,29 +451,17 @@
       
       <button type="submit">Submit Deposit</button>
     </form>
-    
-    <!-- Deposit History -->
-    <div id="deposit-history">
-      <h3>Deposit History</h3>
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th>Amount</th>
-            <th>Plan</th>
-            <th>Date</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="deposit-history-body">
-          <!-- Will be populated by JavaScript -->
-        </tbody>
-      </table>
-    </div>
   </section>
 
   <!-- Withdraw Page -->
   <section id="withdraw" class="page-section hidden">
     <h2>Withdraw Funds</h2>
+    
+    <!-- Available Profit Section -->
+    <div class="available-profit" id="available-profit">
+      Available Profit for Withdrawal: $0.00
+    </div>
+    
     <form id="withdraw-form" autocomplete="off">
       <label for="withdraw-amount">Amount (Minimum $10)</label>
       <input type="number" id="withdraw-amount" min="10" step="0.01" placeholder="Minimum $10" required />
@@ -488,19 +484,19 @@
       <button type="submit">Request Withdrawal</button>
     </form>
     
-    <!-- Withdrawal History -->
-    <div id="withdrawal-history-page">
+    <!-- Withdrawal History Section -->
+    <div class="history-section">
       <h3>Withdrawal History</h3>
       <table class="history-table">
         <thead>
           <tr>
-            <th>Amount</th>
-            <th>Wallet</th>
             <th>Date</th>
+            <th>Amount</th>
+            <th>Address</th>
             <th>Status</th>
           </tr>
         </thead>
-        <tbody id="withdrawal-history-page-body">
+        <tbody id="withdrawal-history">
           <!-- Will be populated by JavaScript -->
         </tbody>
       </table>
@@ -562,25 +558,35 @@
         admin: {
           password: 'admin123',
           balance: 1000,
+          principal: 1000, // Track principal separately
+          availableProfit: 70, // Track profit available for withdrawal
           plan: 'vip',
           referral: '',
           team: ['testuser'],
           profit: 70,
           lastClaimTime: new Date(Date.now() - 86400000).toISOString(), // 24 hours ago
           deposits: [{amount: 1000, plan: 'vip', date: new Date().toISOString(), txHash: 'abc123', status: 'verified'}],
-          withdrawals: [{amount: 100, walletAddress: 'TKNdjRambuwgd2m6CpXnQMaTsazyZFz3hK', date: new Date().toISOString(), status: 'completed'}]
+          withdrawals: [
+            {amount: 20, walletAddress: 'Txyz123', date: new Date(Date.now() - 172800000).toISOString(), status: 'completed'},
+            {amount: 30, walletAddress: 'Txyz456', date: new Date(Date.now() - 86400000).toISOString(), status: 'completed'}
+          ]
         },
         // Sample test user
         testuser: {
           password: 'test123',
           balance: 500,
+          principal: 500,
+          availableProfit: 25,
           plan: 'premium',
           referral: 'admin',
           team: [],
           profit: 25,
           lastClaimTime: new Date(Date.now() - 86400000).toISOString(), // 24 hours ago
           deposits: [{amount: 500, plan: 'premium', date: new Date().toISOString(), txHash: 'def456', status: 'verified'}],
-          withdrawals: [{amount: 50, walletAddress: 'TKNdjRambuwgd2m6CpXnQMaTsazyZFz3hK', date: new Date().toISOString(), status: 'completed'}]
+          withdrawals: [
+            {amount: 10, walletAddress: 'Tabc123', date: new Date(Date.now() - 259200000).toISOString(), status: 'completed'},
+            {amount: 5, walletAddress: 'Tabc456', date: new Date(Date.now() - 172800000).toISOString(), status: 'completed'}
+          ]
         }
       };
       localStorage.setItem(usersKey, JSON.stringify(initialData));
@@ -602,9 +608,8 @@
     });
     updateNavButtons();
     if (pageId === 'dashboard') renderDashboard();
-    if (pageId === 'deposit') renderDepositPage();
-    if (pageId === 'withdraw') renderWithdrawPage();
     if (pageId === 'referral') renderReferralPage();
+    if (pageId === 'withdraw') renderWithdrawPage();
   }
   
   function updateNavButtons() {
@@ -690,16 +695,16 @@
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  // Compute estimated daily profit based on plan & balance
+  // Compute estimated daily profit based on plan & principal
   function computeDailyProfit(user) {
-    if (!user || !user.plan || !user.balance) return 0;
+    if (!user || !user.plan || !user.principal) return 0;
     const plans = {
       basic: 0.03,
       premium: 0.05,
       vip: 0.07
     };
     let roi = plans[user.plan.toLowerCase()] || 0;
-    return user.balance * roi;
+    return user.principal * roi;
   }
 
   // Helper functions for claim feature
@@ -719,7 +724,7 @@
 
   function formatTime(date) {
     if (!date) return '';
-    return date.toLocaleString();
+    return new Date(date).toLocaleString();
   }
 
   // Register form handler
@@ -754,6 +759,8 @@
     users[username] = {
       password: password,
       balance: 0,
+      principal: 0,
+      availableProfit: 0,
       plan: '',
       referral: referral || '',
       team: [],
@@ -778,6 +785,7 @@
       
       // For demo, we'll add a $10 bonus (in real app, this would be based on deposit amount)
       users[referral].balance += 10;
+      users[referral].availableProfit += 10;
       users[referral].profit = computeDailyProfit(users[referral]);
     }
 
@@ -878,95 +886,6 @@
     } else {
       claimSection.classList.add('hidden');
     }
-    
-    // Render withdrawal history on dashboard
-    renderWithdrawalHistory('withdrawal-history-body', user.withdrawals);
-    const withdrawalHistorySection = $('withdrawal-history');
-    if (user.withdrawals.length > 0) {
-      withdrawalHistorySection.classList.remove('hidden');
-    } else {
-      withdrawalHistorySection.classList.add('hidden');
-    }
-  }
-
-  // Render deposit page with history
-  function renderDepositPage() {
-    const username = getSessionUser();
-    if (!username) return;
-    
-    const users = getUsers();
-    const user = users[username];
-    
-    if (!user) {
-      alert('User data not found. Please login again.');
-      clearSession();
-      showPage('login');
-      return;
-    }
-    
-    renderDepositHistory('deposit-history-body', user.deposits);
-  }
-  
-  // Render withdraw page with history
-  function renderWithdrawPage() {
-    const username = getSessionUser();
-    if (!username) return;
-    
-    const users = getUsers();
-    const user = users[username];
-    
-    if (!user) {
-      alert('User data not found. Please login again.');
-      clearSession();
-      showPage('login');
-      return;
-    }
-    
-    renderWithdrawalHistory('withdrawal-history-page-body', user.withdrawals);
-  }
-
-  // Render deposit history
-  function renderDepositHistory(elementId, deposits) {
-    const tbody = $(elementId);
-    tbody.innerHTML = '';
-    
-    if (!deposits || deposits.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No deposits yet</td></tr>';
-      return;
-    }
-    
-    deposits.forEach(deposit => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>$${deposit.amount.toFixed(2)}</td>
-        <td>${capitalize(deposit.plan)}</td>
-        <td>${new Date(deposit.date).toLocaleDateString()}</td>
-        <td>${capitalize(deposit.status)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-  
-  // Render withdrawal history
-  function renderWithdrawalHistory(elementId, withdrawals) {
-    const tbody = $(elementId);
-    tbody.innerHTML = '';
-    
-    if (!withdrawals || withdrawals.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No withdrawals yet</td></tr>';
-      return;
-    }
-    
-    withdrawals.forEach(withdrawal => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>$${withdrawal.amount.toFixed(2)}</td>
-        <td>${withdrawal.walletAddress.substring(0, 6)}...${withdrawal.walletAddress.substring(walletAddress.length - 4)}</td>
-        <td>${new Date(withdrawal.date).toLocaleDateString()}</td>
-        <td>${capitalize(withdrawal.status)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
   }
 
   // Claim profit button handler
@@ -993,6 +912,7 @@
     
     // Update user balance and last claim time
     user.balance += profitAmount;
+    user.availableProfit += profitAmount;
     user.lastClaimTime = new Date().toISOString();
     
     saveUsers(users);
@@ -1082,6 +1002,7 @@
 
     // Update balance and plan
     user.balance = amount;
+    user.principal = amount;
     user.plan = plan;
     user.profit = computeDailyProfit(user);
 
@@ -1097,6 +1018,7 @@
       const bonusAmount = amount * bonusRate;
       
       referrer.balance += bonusAmount;
+      referrer.availableProfit += bonusAmount;
       referrer.profit = computeDailyProfit(referrer);
     }
 
@@ -1105,6 +1027,60 @@
     $('deposit-form').reset();
     showPage('dashboard');
   });
+
+  // Render Withdraw page
+  function renderWithdrawPage() {
+    const username = getSessionUser();
+    if (!username) return;
+    
+    const users = getUsers();
+    const user = users[username];
+    
+    if (!user) {
+      alert('User data not found. Please login again.');
+      clearSession();
+      showPage('login');
+      return;
+    }
+    
+    // Update available profit display
+    $('available-profit').textContent = `Available Profit for Withdrawal: $${user.availableProfit.toFixed(2)}`;
+    
+    // Render withdrawal history
+    const historyTable = $('withdrawal-history');
+    historyTable.innerHTML = '';
+    
+    if (user.withdrawals.length === 0) {
+      historyTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">No withdrawal history yet</td></tr>';
+    } else {
+      // Sort withdrawals by date (newest first)
+      const sortedWithdrawals = [...user.withdrawals].sort((a, b) => 
+        new Date(b.date) - new Date(a.date));
+      
+      sortedWithdrawals.forEach(withdrawal => {
+        const row = document.createElement('tr');
+        
+        const dateCell = document.createElement('td');
+        dateCell.textContent = formatTime(withdrawal.date);
+        row.appendChild(dateCell);
+        
+        const amountCell = document.createElement('td');
+        amountCell.textContent = `$${withdrawal.amount.toFixed(2)}`;
+        row.appendChild(amountCell);
+        
+        const addressCell = document.createElement('td');
+        addressCell.textContent = withdrawal.walletAddress;
+        row.appendChild(addressCell);
+        
+        const statusCell = document.createElement('td');
+        statusCell.textContent = capitalize(withdrawal.status);
+        statusCell.className = `status-${withdrawal.status}`;
+        row.appendChild(statusCell);
+        
+        historyTable.appendChild(row);
+      });
+    }
+  }
 
   // Withdraw form handler
   $('withdraw-form').addEventListener('submit', e => {
@@ -1137,29 +1113,45 @@
       return;
     }
 
-    if (amount > user.balance) {
-      alert('Insufficient balance for this withdrawal.');
+    // Check if trying to withdraw more than available profit
+    if (amount > user.availableProfit) {
+      alert(`You can only withdraw up to $${user.availableProfit.toFixed(2)} (your available profit).`);
       return;
     }
 
     // Record withdrawal
-    user.withdrawals.push({
+    const withdrawal = {
       amount: amount,
       walletAddress: walletAddress,
       date: new Date().toISOString(),
       status: 'pending'
-    });
+    };
+    
+    user.withdrawals.push(withdrawal);
 
-    // Update balance (in real app, this would happen after admin approval)
+    // Update balance and available profit
     user.balance -= amount;
+    user.availableProfit -= amount;
     user.profit = computeDailyProfit(user);
 
     saveUsers(users);
     alert(`Withdrawal request for $${amount.toFixed(2)} submitted. Please contact support on Telegram to complete the process.`);
     $('withdraw-form').reset();
     
-    // Update the dashboard and withdrawal history
-    renderDashboard();
+    // Auto-complete withdrawal after 5 seconds (for demo purposes)
+    setTimeout(() => {
+      const users = getUsers();
+      const user = users[username];
+      if (user) {
+        const lastWithdrawal = user.withdrawals[user.withdrawals.length - 1];
+        if (lastWithdrawal && lastWithdrawal.status === 'pending') {
+          lastWithdrawal.status = 'completed';
+          saveUsers(users);
+          renderWithdrawPage();
+        }
+      }
+    }, 5000);
+    
     renderWithdrawPage();
   });
 
@@ -1230,6 +1222,7 @@
     
     // Add bonus to referrer's balance
     user.balance += bonusAmount;
+    user.availableProfit += bonusAmount;
     user.profit = computeDailyProfit(user);
     
     // If the referral user exists, update their referral field
