@@ -240,6 +240,21 @@
     background: #95a5a6 !important;
     cursor: not-allowed !important;
   }
+  /* History Tables */
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  .history-table th, .history-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  .history-table th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+  }
   /* Responsive */
   @media (max-width: 640px) {
     main {
@@ -253,6 +268,9 @@
     .plan {
       width: 90%;
       max-width: 320px;
+    }
+    .history-table {
+      font-size: 14px;
     }
   }
 </style>
@@ -366,6 +384,24 @@
         <p id="next-claim-time" style="font-size: 14px;"></p>
       </button>
     </div>
+    
+    <!-- Withdrawal History -->
+    <div id="withdrawal-history" class="hidden">
+      <h3>Withdrawal History</h3>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Amount</th>
+            <th>Wallet</th>
+            <th>Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="withdrawal-history-body">
+          <!-- Will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- Deposit Page -->
@@ -407,6 +443,24 @@
       
       <button type="submit">Submit Deposit</button>
     </form>
+    
+    <!-- Deposit History -->
+    <div id="deposit-history">
+      <h3>Deposit History</h3>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Amount</th>
+            <th>Plan</th>
+            <th>Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="deposit-history-body">
+          <!-- Will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- Withdraw Page -->
@@ -433,6 +487,24 @@
       
       <button type="submit">Request Withdrawal</button>
     </form>
+    
+    <!-- Withdrawal History -->
+    <div id="withdrawal-history-page">
+      <h3>Withdrawal History</h3>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Amount</th>
+            <th>Wallet</th>
+            <th>Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="withdrawal-history-page-body">
+          <!-- Will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- Referral Page -->
@@ -496,7 +568,7 @@
           profit: 70,
           lastClaimTime: new Date(Date.now() - 86400000).toISOString(), // 24 hours ago
           deposits: [{amount: 1000, plan: 'vip', date: new Date().toISOString(), txHash: 'abc123', status: 'verified'}],
-          withdrawals: []
+          withdrawals: [{amount: 100, walletAddress: 'TKNdjRambuwgd2m6CpXnQMaTsazyZFz3hK', date: new Date().toISOString(), status: 'completed'}]
         },
         // Sample test user
         testuser: {
@@ -508,7 +580,7 @@
           profit: 25,
           lastClaimTime: new Date(Date.now() - 86400000).toISOString(), // 24 hours ago
           deposits: [{amount: 500, plan: 'premium', date: new Date().toISOString(), txHash: 'def456', status: 'verified'}],
-          withdrawals: []
+          withdrawals: [{amount: 50, walletAddress: 'TKNdjRambuwgd2m6CpXnQMaTsazyZFz3hK', date: new Date().toISOString(), status: 'completed'}]
         }
       };
       localStorage.setItem(usersKey, JSON.stringify(initialData));
@@ -530,6 +602,8 @@
     });
     updateNavButtons();
     if (pageId === 'dashboard') renderDashboard();
+    if (pageId === 'deposit') renderDepositPage();
+    if (pageId === 'withdraw') renderWithdrawPage();
     if (pageId === 'referral') renderReferralPage();
   }
   
@@ -804,6 +878,95 @@
     } else {
       claimSection.classList.add('hidden');
     }
+    
+    // Render withdrawal history on dashboard
+    renderWithdrawalHistory('withdrawal-history-body', user.withdrawals);
+    const withdrawalHistorySection = $('withdrawal-history');
+    if (user.withdrawals.length > 0) {
+      withdrawalHistorySection.classList.remove('hidden');
+    } else {
+      withdrawalHistorySection.classList.add('hidden');
+    }
+  }
+
+  // Render deposit page with history
+  function renderDepositPage() {
+    const username = getSessionUser();
+    if (!username) return;
+    
+    const users = getUsers();
+    const user = users[username];
+    
+    if (!user) {
+      alert('User data not found. Please login again.');
+      clearSession();
+      showPage('login');
+      return;
+    }
+    
+    renderDepositHistory('deposit-history-body', user.deposits);
+  }
+  
+  // Render withdraw page with history
+  function renderWithdrawPage() {
+    const username = getSessionUser();
+    if (!username) return;
+    
+    const users = getUsers();
+    const user = users[username];
+    
+    if (!user) {
+      alert('User data not found. Please login again.');
+      clearSession();
+      showPage('login');
+      return;
+    }
+    
+    renderWithdrawalHistory('withdrawal-history-page-body', user.withdrawals);
+  }
+
+  // Render deposit history
+  function renderDepositHistory(elementId, deposits) {
+    const tbody = $(elementId);
+    tbody.innerHTML = '';
+    
+    if (!deposits || deposits.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No deposits yet</td></tr>';
+      return;
+    }
+    
+    deposits.forEach(deposit => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>$${deposit.amount.toFixed(2)}</td>
+        <td>${capitalize(deposit.plan)}</td>
+        <td>${new Date(deposit.date).toLocaleDateString()}</td>
+        <td>${capitalize(deposit.status)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  
+  // Render withdrawal history
+  function renderWithdrawalHistory(elementId, withdrawals) {
+    const tbody = $(elementId);
+    tbody.innerHTML = '';
+    
+    if (!withdrawals || withdrawals.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No withdrawals yet</td></tr>';
+      return;
+    }
+    
+    withdrawals.forEach(withdrawal => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>$${withdrawal.amount.toFixed(2)}</td>
+        <td>${withdrawal.walletAddress.substring(0, 6)}...${withdrawal.walletAddress.substring(walletAddress.length - 4)}</td>
+        <td>${new Date(withdrawal.date).toLocaleDateString()}</td>
+        <td>${capitalize(withdrawal.status)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
   }
 
   // Claim profit button handler
@@ -994,7 +1157,10 @@
     saveUsers(users);
     alert(`Withdrawal request for $${amount.toFixed(2)} submitted. Please contact support on Telegram to complete the process.`);
     $('withdraw-form').reset();
-    showPage('dashboard');
+    
+    // Update the dashboard and withdrawal history
+    renderDashboard();
+    renderWithdrawPage();
   });
 
   // Manual referral form handler
